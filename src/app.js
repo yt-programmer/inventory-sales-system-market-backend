@@ -55,19 +55,21 @@ const init = () =>
   }));
 
 export default async function handler(req, res) {
-  console.log(
-    "REQ URL:",
-    req.url,
-    "| ORIGINAL:",
-    req.headers["x-matched-path"],
-    req.headers["x-vercel-forwarded-for"] ? "" : "",
-  );
   try {
     await init();
   } catch (e) {
     console.error("Init failed:", e.message);
     return res.status(503).json({ error: "Database is unavailable right now" });
   }
+
+  // Restore the original path that the rewrite replaced
+  const u = new URL(req.url, "http://localhost");
+  const p = u.searchParams.get("__p");
+  if (p !== null) {
+    u.searchParams.delete("__p");
+    req.url = "/" + p + u.search;
+  }
+
   app ??= createApp();
   return app(req, res);
 }
