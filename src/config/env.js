@@ -23,24 +23,28 @@ export function parseEnv(src) {
   };
   const oneOf = (k, list) => {
     const v = str(k);
-    if (v && !list.includes(v)) problems.push(`${k}: must be one of ${list.join(" | ")}`);
+    if (v && !list.includes(v))
+      problems.push(`${k}: must be one of ${list.join(" | ")}`);
     return v;
   };
 
   const nodeEnv = oneOf("NODE_ENV", ["development", "production", "test"]);
   const sameSite = oneOf("COOKIE_SAMESITE", ["lax", "strict", "none"]);
   const jwtSecret = str("JWT_SECRET");
-  if (jwtSecret && jwtSecret.length < 32) problems.push("JWT_SECRET: must be at least 32 characters");
+  if (jwtSecret && jwtSecret.length < 32)
+    problems.push("JWT_SECRET: must be at least 32 characters");
   const adminPassword = str("ADMIN_PASSWORD");
   if (nodeEnv === "production" && adminPassword && adminPassword.length < 8) {
-    problems.push("ADMIN_PASSWORD: must be at least 8 characters in production");
+    problems.push(
+      "ADMIN_PASSWORD: must be at least 8 characters in production",
+    );
   }
 
   const cfg = {
     nodeEnv,
     isProd: nodeEnv === "production",
     isTest: nodeEnv === "test",
-    tz: str("TZ"),
+    tz: str("TIMEZONE"),
     port: int("PORT", 1),
     mongoUri: str("MONGO_URI"),
     jwtSecret,
@@ -51,7 +55,10 @@ export function parseEnv(src) {
     cookieDomain: String(src.COOKIE_DOMAIN || "").trim() || undefined, // اختياري
     cookieSameSite: sameSite,
     cookieSecure: nodeEnv === "production" || sameSite === "none",
-    corsOrigins: str("CORS_ORIGIN").split(",").map((s) => s.trim()).filter(Boolean),
+    corsOrigins: str("CORS_ORIGIN")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
     bcryptRounds: int("BCRYPT_ROUNDS", 4),
     maxLoginAttempts: int("MAX_LOGIN_ATTEMPTS", 1),
     lockMinutes: int("LOCK_MINUTES", 1),
@@ -61,7 +68,11 @@ export function parseEnv(src) {
     rateLimitLogin: int("RATE_LIMIT_LOGIN", 1),
     bodyLimitKb: int("BODY_LIMIT_KB", 1),
   };
-  if (problems.length) throw new Error("The .env file is missing or has invalid values:\n- " + problems.join("\n- "));
+  if (problems.length)
+    throw new Error(
+      "The .env file is missing or has invalid values:\n- " +
+        problems.join("\n- "),
+    );
   return cfg;
 }
 
