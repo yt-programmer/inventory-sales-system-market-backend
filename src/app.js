@@ -55,6 +55,13 @@ const init = () =>
   }));
 
 export default async function handler(req, res) {
+  console.log(
+    "REQ URL:",
+    req.url,
+    "| ORIGINAL:",
+    req.headers["x-matched-path"],
+    req.headers["x-vercel-forwarded-for"] ? "" : "",
+  );
   try {
     await init();
   } catch (e) {
